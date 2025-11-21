@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:latest
+    container_name: cassava_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api_1
+    networks:
+      - cassava_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # API Service 1
+  api_1:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.api
+    container_name: cassava_api_1
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - cassava_network
+    ports:
+      - "8001:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # API Service 2
+  api_2:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.api
+    container_name: cassava_api_2
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - cassava_network
+    ports:
+      - "8002:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Streamlit UI
+  ui:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.ui
+    container_name: cassava_ui
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - cassava_network
+    ports:
+      - "8501:8501"
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - api_1
+
+networks:
+  cassava_network:
+    driver: bridge

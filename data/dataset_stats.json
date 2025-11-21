@@ -1,0 +1,15 @@
+{
+  "train": {
+    "Glioma": 1220,
+    "Meningioma": 1227,
+    "Pituitary": 1294,
+    "No_Tumor": 1537
+  },
+  "test": {
+    "Glioma": 401,
+    "Meningioma": 418,
+    "Pituitary": 463,
+    "No_Tumor": 463
+  },
+  "total": 7023
+}

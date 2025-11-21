@@ -1,0 +1,33 @@
+{
+  "model_name": "Brain Tumor MRI Classifier",
+  "version": "1.0",
+  "architecture": "MobileNetV2 Transfer Learning",
+  "input_shape": [
+    -1,
+    224,
+    224,
+    3
+  ],
+  "num_classes": 4,
+  "class_labels": [
+    "Glioma",
+    "Meningioma",
+    "Pituitary",
+    "No_Tumor"
+  ],
+  "training_date": "2025-11-21T21:38:03.999708",
+  "metrics": {
+    "accuracy": 0.9621211886405945,
+    "loss": 1.6358000040054321,
+    "precision": 0.9635359674716697,
+    "recall": 0.9621212121212122,
+    "f1_score": 0.9621434325693197,
+    "roc_auc": 0.9983789528726273
+  },
+  "hyperparameters": {
+    "learning_rate": 0.0001,
+    "batch_size": 32,
+    "epochs_trained": 15,
+    "optimizer": "Adam"
+  }
+}

@@ -1,0 +1,124 @@
+
+🧠 BRAIN TUMOR MRI - KAGGLEHUB QUICK GUIDE 🧠
+═══════════════════════════════════════════════════════════════════════════════
+
+NO SETUP REQUIRED! Just 2 commands:
+
+  1. /Users/apple/MLOP/.venv/bin/python -c "import kagglehub; print('✓')"
+     → Verifies kagglehub is installed
+
+  2. /Users/apple/MLOP/.venv/bin/python src/data_acquisition.py
+     → Downloads & organizes dataset (10-20 minutes)
+
+That's it!
+
+
+WHAT HAPPENS:
+═══════════════════════════════════════════════════════════════════════════════
+
+First time you run:
+  • Browser opens for Kaggle login (one-time only)
+  • Downloads all 7,400 MRI images
+  • Automatically extracts & organizes
+  • Creates statistics file
+  • Organizes into train/test folders
+
+Next time you run:
+  • Uses cached credentials
+  • Much faster!
+
+
+EXPECTED OUTPUT:
+═══════════════════════════════════════════════════════════════════════════════
+
+Starting Brain Tumor MRI dataset download...
+Setting up directories...
+Directories ready at /Users/apple/MLOP/data
+Downloading Kaggle dataset: masoudnickparvar/brain-tumor-mri-dataset
+This may take 5-15 minutes depending on internet speed...
+✓ Dataset downloaded to: /root/.cache/kagglehub/datasets/masoudnickparvar/brain-tumor-mri-dataset/versions/1
+Organizing images by class and split...
+Processed 500 images...
+Processed 1000 images...
+... (continues until all 7400 images are processed)
+✓ Organized 5700 training images and 1700 test images
+✓ Statistics saved to /Users/apple/MLOP/data/dataset_stats.json
+✓ Data acquisition complete!
+Dataset is ready in: /Users/apple/MLOP/data
+
+
+VERIFY DOWNLOAD:
+═══════════════════════════════════════════════════════════════════════════════
+
+Check that files were organized:
+  ls -la /Users/apple/MLOP/data/train/
+  ls -la /Users/apple/MLOP/data/test/
+
+Count images:
+  find /Users/apple/MLOP/data/train -name "*.jpg" | wc -l
+
+View statistics:
+  cat /Users/apple/MLOP/data/dataset_stats.json
+
+
+AFTER DOWNLOAD:
+═══════════════════════════════════════════════════════════════════════════════
+
+Train the model:
+  jupyter notebook notebook/brain_tumor_mri.ipynb
+
+Run the API:
+  /Users/apple/MLOP/.venv/bin/python src/api.py
+
+Run the UI:
+  streamlit run deploy/ui.py
+
+Use Docker:
+  docker-compose up --build
+
+
+TROUBLESHOOTING:
+═══════════════════════════════════════════════════════════════════════════════
+
+Q: "kagglehub is not installed"
+A: pip install kagglehub
+
+Q: "Authentication failed"
+A: kagglehub will open browser on first run. Just log in.
+
+Q: "Download seems stuck"
+A: Wait 10-20 minutes. It's normal for 7,400 images.
+
+Q: "Only partial download"
+A: Run script again - kagglehub will resume from where it left off.
+
+Q: "Out of disk space"
+A: Free up 1-2 GB. Dataset is ~300-400 MB uncompressed.
+
+
+DATASET STRUCTURE:
+═══════════════════════════════════════════════════════════════════════════════
+
+After download, you'll have:
+
+  data/
+  ├── train/
+  │   ├── Glioma/              (~2,400 images)
+  │   ├── Meningioma/          (~1,500 images)
+  │   ├── Pituitary/           (~1,800 images)
+  │   └── No_Tumor/            (~1,100 images)
+  ├── test/
+  │   ├── Glioma/              (~700 images)
+  │   ├── Meningioma/          (~500 images)
+  │   ├── Pituitary/           (~600 images)
+  │   └── No_Tumor/            (~300 images)
+  ├── uploads/                 (for retraining - initially empty)
+  └── dataset_stats.json       (statistics file)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 Ready to go! Run:
+   /Users/apple/MLOP/.venv/bin/python src/data_acquisition.py
+
+═══════════════════════════════════════════════════════════════════════════════
