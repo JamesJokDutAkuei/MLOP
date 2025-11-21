@@ -25,7 +25,9 @@ from pydantic import BaseModel
 import uvicorn
 from PIL import Image
 import numpy as np
-import tensorflow as tf
+
+# Lazy import TensorFlow to avoid Python 3.13 compatibility issues
+tf = None
 
 # Setup logging
 logging.basicConfig(
@@ -115,8 +117,13 @@ class HealthResponse(BaseModel):
 
 def load_model():
     """Load trained model from disk."""
-    global model
+    global model, tf
     try:
+        # Initialize TensorFlow on first use
+        if tf is None:
+            import tensorflow
+            tf = tensorflow
+        
         if not MODEL_PATH.exists():
             logger.error(f"Model not found at {MODEL_PATH}")
             return False
