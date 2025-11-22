@@ -191,8 +191,42 @@ with tab2:
                     
                     if response.status_code == 200:
                         result = response.json()
-                        st.success(f"✓ Retrain job started: {result['job_id']}")
+                        job_id = result['job_id']
+                        st.success(f"✓ Retrain job started: {job_id}")
                         st.info(f"Status: {result['status']}")
+                        
+                        # Auto-check status
+                        st.markdown("---")
+                        st.subheader("📊 Training Status")
+                        
+                        with st.spinner("Checking training status..."):
+                            import time
+                            time.sleep(2)
+                            status_response = requests.get(
+                                f"{API_URL}/retrain_status/{job_id}",
+                                timeout=10
+                            )
+                            
+                            if status_response.status_code == 200:
+                                status_data = status_response.json()
+                                
+                                col_status1, col_status2, col_status3 = st.columns(3)
+                                
+                                with col_status1:
+                                    st.metric("Job Status", status_data['status'].upper())
+                                
+                                with col_status2:
+                                    st.metric("Accuracy", f"{status_data['accuracy']*100:.1f}%")
+                                
+                                with col_status3:
+                                    st.metric("Loss", f"{status_data['loss']:.4f}")
+                                
+                                st.success(f"✓ Model Updated to Version {status_data['model_version']}")
+                                
+                                if status_data['status'] == 'completed':
+                                    st.balloons()
+                                    st.info(f"🎉 Training completed at {status_data['completed_at']}")
+                            
                     else:
                         st.error(f"Failed: {response.text}")
                 except Exception as e:
