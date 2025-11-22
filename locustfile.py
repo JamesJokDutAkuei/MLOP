@@ -1,27 +1,55 @@
 """
-Locust Load Testing Script for Cassava Leaf Disease API
+Locust Load Testing Script for Brain Tumor MRI Classifier API
 
 Simulates concurrent users making predictions to test:
-- Response time
-- Throughput
-- Latency under load
-- Error rates
+- Response time (latency)
+- Throughput (requests/second)
+- Error rates under load
+- System behavior with multiple replicas
+
+Usage:
+    locust -f locustfile.py --host=http://localhost:80 --users=100 --spawn-rate=10 --run-time=1m
+    
+Headless mode:
+    locust -f locustfile.py --host=http://localhost:80 --users=100 --spawn-rate=10 --run-time=1m --headless
+
+Web UI:
+    locust -f locustfile.py --host=http://localhost:80
+    Then open: http://localhost:8089
 """
 
 import random
 import time
+import os
 from io import BytesIO
 from locust import HttpUser, task, between, events
 import csv
 from datetime import datetime
 from pathlib import Path
 
-# Create test image (1x1 white pixel PNG)
-TEST_IMAGE = BytesIO(
-    b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01'
-    b'\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\x0f\x00'
-    b'\x00\x01\x01\x00\x051\xc3c\xce\x00\x00\x00\x00IEND\xaeB`\x82'
-)
+# Test images
+TEST_IMAGES = {
+    'tumor_glioma': (
+        b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01'
+        b'\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\x0f\x00'
+        b'\x00\x01\x01\x00\x051\xc3c\xce\x00\x00\x00\x00IEND\xaeB`\x82'
+    ),
+    'tumor_meningioma': (
+        b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01'
+        b'\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\x0f\x00'
+        b'\x00\x01\x01\x00\x051\xc3c\xce\x00\x00\x00\x00IEND\xaeB`\x82'
+    ),
+    'tumor_pituitary': (
+        b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01'
+        b'\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\x0f\x00'
+        b'\x00\x01\x01\x00\x051\xc3c\xce\x00\x00\x00\x00IEND\xaeB`\x82'
+    ),
+    'no_tumor': (
+        b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01'
+        b'\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\x0f\x00'
+        b'\x00\x01\x01\x00\x051\xc3c\xce\x00\x00\x00\x00IEND\xaeB`\x82'
+    )
+}
 
 # Results storage
 results = {
@@ -35,24 +63,36 @@ results = {
 LOGS_DIR = Path('logs/locust_results')
 LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
+# CSV writer for results
+results_file = LOGS_DIR / f'results_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+csv_writer = None
 
-class CassavaAPIUser(HttpUser):
-    """Locust user for Cassava API load testing."""
+
+class BrainTumorAPIUser(HttpUser):
+    """Locust user for Brain Tumor MRI API load testing.
     
-    wait_time = between(1, 3)  # Wait 1-3 seconds between requests
+    Simulates realistic users:
+    - 60% make predictions (most common)
+    - 20% check health
+    - 20% trigger retraining
+    """
+    
+    wait_time = between(1, 4)  # Wait 1-4 seconds between requests
     
     def on_start(self):
-        """Run at start of test."""
+        """Run at start of each user's test."""
         pass
     
-    @task(3)
+    @task(6)
     def predict_image(self):
-        """Task: Make prediction on image."""
-        TEST_IMAGE.seek(0)
+        """Task: Make prediction on MRI image (60% of traffic)."""
+        # Select random test image
+        image_class = random.choice(list(TEST_IMAGES.keys()))
+        image_data = TEST_IMAGES[image_class]
         
         with self.client.post(
             '/predict',
-            files={'file': ('test.png', TEST_IMAGE, 'image/png')},
+            files={'file': ('test.png', BytesIO(image_data), 'image/png')},
             catch_response=True
         ) as response:
             if response.status_code == 200:
@@ -60,16 +100,31 @@ class CassavaAPIUser(HttpUser):
                 response.success()
             else:
                 results['error_count'] += 1
-                response.failure(f"Status {response.status_code}")
+                response.failure(f"Prediction failed: {response.status_code}")
     
-    @task(1)
+    @task(2)
     def health_check(self):
-        """Task: Check API health."""
+        """Task: Check API health (20% of traffic)."""
         with self.client.get('/health', catch_response=True) as response:
             if response.status_code == 200:
                 response.success()
             else:
                 response.failure(f"Health check failed: {response.status_code}")
+    
+    @task(2)
+    def retrain_trigger(self):
+        """Task: Trigger model retraining (20% of traffic)."""
+        payload = {
+            'epochs': random.randint(1, 10),
+            'batch_size': random.choice([8, 16, 32, 64]),
+            'learning_rate': random.choice([1e-3, 1e-4, 1e-5])
+        }
+        
+        with self.client.post('/retrain', json=payload, catch_response=True) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Retrain failed: {response.status_code}")
 
 
 @events.test_start.add_listener
