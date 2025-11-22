@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -11,7 +11,14 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir \
+    streamlit==1.28.0 \
+    requests==2.31.0 \
+    pandas==2.0.3 \
+    numpy==1.24.3 \
+    pillow==10.0.0 \
+    matplotlib==3.7.2 \
+    seaborn==0.12.2
 
 # Copy project files
 COPY src/ src/
@@ -19,9 +26,10 @@ COPY deploy/ deploy/
 COPY models/ models/
 COPY data/ data/
 COPY logs/ logs/
+COPY .streamlit/ .streamlit/
 
 # Expose port
 EXPOSE 8501
 
 # Run Streamlit
-CMD ["streamlit", "run", "deploy/ui.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "deploy/ui.py", "--server.port=8501", "--server.address=0.0.0.0", "--client.showErrorDetails=false"]
