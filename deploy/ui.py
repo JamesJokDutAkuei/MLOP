@@ -16,9 +16,15 @@ import pandas as pd
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import os
 
-# API Configuration
-API_URL = "http://127.0.0.1:8000"
+# API Configuration - Auto-detect environment
+# In Docker, use Nginx; locally, use direct API
+if os.getenv("DOCKER_ENV") == "true":
+    API_URL = "http://nginx:80"  # Docker internal network
+else:
+    # Try local API first, fallback to nginx
+    API_URL = "http://127.0.0.1:8000"
 
 def check_api_health():
     """Check if API is running."""

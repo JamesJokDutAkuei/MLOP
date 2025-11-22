@@ -4,7 +4,7 @@ services:
   # Nginx reverse proxy
   nginx:
     image: nginx:latest
-    container_name: cassava_nginx
+    container_name: mlop_nginx
     ports:
       - "80:80"
     volumes:
@@ -12,7 +12,7 @@ services:
     depends_on:
       - api_1
     networks:
-      - cassava_network
+      - mlop_network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 10s
@@ -24,7 +24,7 @@ services:
     build:
       context: .
       dockerfile: deploy/Dockerfile.api
-    container_name: cassava_api_1
+    container_name: mlop_api_1
     environment:
       - PYTHONUNBUFFERED=1
     volumes:
@@ -32,7 +32,7 @@ services:
       - ./data:/app/data
       - ./logs:/app/logs
     networks:
-      - cassava_network
+      - mlop_network
     ports:
       - "8001:8000"
     healthcheck:
@@ -46,7 +46,7 @@ services:
     build:
       context: .
       dockerfile: deploy/Dockerfile.api
-    container_name: cassava_api_2
+    container_name: mlop_api_2
     environment:
       - PYTHONUNBUFFERED=1
     volumes:
@@ -54,7 +54,7 @@ services:
       - ./data:/app/data
       - ./logs:/app/logs
     networks:
-      - cassava_network
+      - mlop_network
     ports:
       - "8002:8000"
     healthcheck:
@@ -68,18 +68,19 @@ services:
     build:
       context: .
       dockerfile: deploy/Dockerfile.ui
-    container_name: cassava_ui
+    container_name: mlop_ui
     volumes:
       - ./logs:/app/logs
     networks:
-      - cassava_network
+      - mlop_network
     ports:
       - "8501:8501"
     environment:
       - PYTHONUNBUFFERED=1
+      - DOCKER_ENV=true
     depends_on:
       - api_1
 
 networks:
-  cassava_network:
+  mlop_network:
     driver: bridge
