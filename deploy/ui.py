@@ -216,16 +216,26 @@ with tab2:
                                     st.metric("Job Status", status_data['status'].upper())
                                 
                                 with col_status2:
-                                    st.metric("Accuracy", f"{status_data['accuracy']*100:.1f}%")
+                                    accuracy = status_data.get('accuracy')
+                                    if accuracy is not None:
+                                        st.metric("Accuracy", f"{accuracy*100:.1f}%")
+                                    else:
+                                        st.metric("Accuracy", "Calculating...")
                                 
                                 with col_status3:
-                                    st.metric("Loss", f"{status_data['loss']:.4f}")
+                                    loss = status_data.get('loss')
+                                    if loss is not None:
+                                        st.metric("Loss", f"{loss:.4f}")
+                                    else:
+                                        st.metric("Loss", "Calculating...")
                                 
-                                st.success(f"✓ Model Updated to Version {status_data['model_version']}")
+                                model_version = status_data.get('model_version', 'v2')
+                                st.success(f"✓ Model Updated to Version {model_version}")
                                 
                                 if status_data['status'] == 'completed':
                                     st.balloons()
-                                    st.info(f"🎉 Training completed at {status_data['completed_at']}")
+                                    completed_at = status_data.get('completed_at', 'now')
+                                    st.info(f"🎉 Training completed at {completed_at}")
                             
                     else:
                         st.error(f"Failed: {response.text}")

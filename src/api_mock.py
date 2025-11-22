@@ -79,7 +79,7 @@ async def retrain_status(job_id: str):
         "accuracy": 0.96,
         "loss": 0.12,
         "model_version": "v2",
-        "completed_at": "2025-11-22T23:00:00",
+        "completed_at": "2025-11-23T23:10:00",
         "error": None
     }
 
