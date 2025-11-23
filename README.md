@@ -133,7 +133,7 @@ streamlit run deploy/ui.py
 # UI runs on http://localhost:8501
 ```
 
-### 5. **Docker Deployment (Multi-Container)**
+### 5. **Docker Deployment (Multi-Container Locally)**
 
 Run API + UI in Docker with Nginx load balancing:
 
@@ -154,7 +154,19 @@ docker-compose up -d --scale api=4
 
 This runs 4 API containers behind Nginx for load distribution.
 
-### 6. **Load Testing with Locust**
+### 6. **☁️ Cloud Deployment (Render)**
+
+Deploy to **Render** - FREE cloud platform, NO BILLING REQUIRED:
+
+**Step 1:** Push to GitHub (see `GITHUB_SETUP.md`)
+
+**Step 2:** Follow `RENDER_QUICK_START.md` (5 minutes, no configuration needed)
+
+Your app will be live at:
+- **UI**: `https://mlop-ui-xxxxx.onrender.com`
+- **API**: `https://mlop-api-xxxxx.onrender.com`
+
+### 7. **Load Testing with Locust**
 
 Run flood request simulation:
 

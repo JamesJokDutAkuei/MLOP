@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: mlop-api
+    env: docker
+    dockerfilePath: ./deploy/Dockerfile.api
+    port: 8000
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_UNBUFFERED
+        value: "1"
+
+  - type: web
+    name: mlop-ui
+    env: docker
+    dockerfilePath: ./deploy/Dockerfile.ui
+    port: 8501
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: STREAMLIT_SERVER_HEADLESS
+        value: "true"
+      - key: STREAMLIT_SERVER_PORT
+        value: "8501"
+      - key: GCP_API_URL
+        fromService:
+          name: mlop-api
+          property: url
+      - key: DOCKER_ENV
+        value: "true"
