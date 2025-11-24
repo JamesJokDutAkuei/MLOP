@@ -8,6 +8,10 @@ import time
 
 app = FastAPI(title="Brain Tumor MRI Classifier API (Mock)")
 
+@app.get("/")
+async def root():
+    return {"message": "Brain Tumor MRI Classifier API", "status": "running"}
+
 class PredictionResponse(BaseModel):
     predicted_class: str
     predicted_class_short: str

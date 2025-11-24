@@ -31,11 +31,13 @@ else:
     API_URL = "http://127.0.0.1:8000"
 
 def check_api_health():
-    """Check if API is running."""
+    """Check if API is running. Render free tier may need time to wake up."""
     try:
-        response = requests.get(f"{API_URL}/health", timeout=2)
+        # Longer timeout for Render free tier (needs ~30s to wake from sleep)
+        response = requests.get(f"{API_URL}/health", timeout=45)
         return response.status_code == 200
-    except:
+    except Exception as e:
+        st.write(f"Debug: API check failed - {str(e)}")
         return False
 
 # Sidebar
