@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: mlop-api
+    name: brain-tumor-api
     env: docker
     dockerfilePath: ./deploy/Dockerfile.api
     port: 8000
