@@ -6,10 +6,18 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Brain Tumor MRI Classifier",
-    page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Apply white background theme
+st.markdown("""
+    <style>
+        body { background-color: #FFFFFF; color: #000000; }
+        .stApp { background-color: #FFFFFF; }
+        [data-testid="stAppViewContainer"] { background-color: #FFFFFF; }
+    </style>
+    """, unsafe_allow_html=True)
 
 import requests
 import pandas as pd
@@ -41,7 +49,7 @@ def check_api_health():
         return False
 
 # Sidebar
-st.sidebar.title("🧠 Brain Tumor MRI Classifier")
+st.sidebar.title("Brain Tumor MRI Classifier")
 st.sidebar.markdown("---")
 
 # Show status - lazy load
@@ -51,33 +59,33 @@ api_status_placeholder = st.sidebar.empty()
 def update_api_status():
     api_healthy = check_api_health()
     if api_healthy:
-        api_status_placeholder.success("✅ API Connected")
+        api_status_placeholder.success("API Connected")
         return True
     else:
-        api_status_placeholder.warning("⚠️ API Not Available - Waking up on first request...")
+        api_status_placeholder.warning("API Not Available - Waking up on first request...")
         return False
 
 api_healthy = update_api_status()
 
 # Main tabs
 tab1, tab2, tab3, tab4 = st.tabs([
-    "🔮 Predict",
-    "📤 Upload & Retrain",
-    "📊 Model Info",
-    "🛠️ Admin"
+    "Predict",
+    "Upload & Retrain",
+    "Model Info",
+    "Admin"
 ])
 
 # ============================================================================
 # TAB 1: PREDICTION
 # ============================================================================
 with tab1:
-    st.header("🔮 Single Image Prediction")
+    st.header("Single Image Prediction")
     st.markdown("Upload a brain MRI image to get a tumor classification prediction.")
     
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.subheader("📸 Upload Image")
+        st.subheader("Upload Image")
         uploaded_file = st.file_uploader(
             "Choose an image",
             type=["jpg", "jpeg", "png"],
@@ -89,10 +97,10 @@ with tab1:
             st.image(image, use_column_width=True, caption="Uploaded Image")
     
     with col2:
-        st.subheader("🎯 Prediction Result")
+        st.subheader("Prediction Result")
         
         if uploaded_file is not None:
-            if st.button("🚀 Predict", key="predict_btn"):
+            if st.button("Predict", key="predict_btn"):
                 with st.spinner("Analyzing image... (may take 30+ seconds on first request)"):
                     try:
                         files = {"file": uploaded_file.getvalue()}
@@ -105,7 +113,7 @@ with tab1:
                         if response.status_code == 200:
                             result = response.json()
                             
-                            st.success("✓ Prediction Complete!")
+                            st.success("Prediction Complete!")
                             
                             # Display prediction
                             predicted_class = result['predicted_class']
@@ -143,19 +151,19 @@ with tab1:
                     except Exception as e:
                         st.error(f"Error: {str(e)}")
         else:
-            st.info("⚠️ Upload an image to get started")
+            st.info("Upload an image to get started")
 
 # ============================================================================
 # TAB 2: UPLOAD & RETRAIN
 # ============================================================================
 with tab2:
-    st.header("📤 Upload Data & Trigger Retraining")
+    st.header("Upload Data & Trigger Retraining")
     st.markdown("Upload images and retrain the model on new data.")
     
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.subheader("📂 Upload Images")
+        st.subheader("Upload Images")
         
         disease_label = st.selectbox(
             "Select disease class",
@@ -171,7 +179,7 @@ with tab2:
         )
         
         if uploaded_files and api_healthy:
-            if st.button("📤 Upload Files", key="upload_btn"):
+            if st.button("Upload Files", key="upload_btn"):
                 with st.spinner(f"Uploading {len(uploaded_files)} file(s)..."):
                     try:
                         files = [("files", (f.name, f.getvalue(), "image/jpeg")) for f in uploaded_files]
@@ -183,20 +191,20 @@ with tab2:
                         
                         if response.status_code == 200:
                             result = response.json()
-                            st.success(f"✓ Uploaded {result.get('uploaded_count', 0)} files!")
+                            st.success(f"Uploaded {result.get('uploaded_count', 0)} files!")
                         else:
                             st.error(f"Upload failed: {response.text}")
                     except Exception as e:
                         st.error(f"Error: {str(e)}")
     
     with col2:
-        st.subheader("🔄 Trigger Retraining")
+        st.subheader("Trigger Retraining")
         
         epochs = st.slider("Training Epochs", 1, 20, 5)
         batch_size = st.slider("Batch Size", 8, 64, 32)
         learning_rate = st.selectbox("Learning Rate", [1e-3, 1e-4, 1e-5], format_func=lambda x: f"{x:.0e}")
         
-        if st.button("🚀 Start Retrain", key="retrain_btn") and api_healthy:
+        if st.button("Start Retrain", key="retrain_btn") and api_healthy:
             with st.spinner("Starting retraining job..."):
                 try:
                     payload = {
@@ -213,12 +221,12 @@ with tab2:
                     if response.status_code == 200:
                         result = response.json()
                         job_id = result['job_id']
-                        st.success(f"✓ Retrain job started: {job_id}")
+                        st.success(f"Retrain job started: {job_id}")
                         st.info(f"Status: {result['status']}")
                         
                         # Auto-check status
                         st.markdown("---")
-                        st.subheader("📊 Training Status")
+                        st.subheader("Training Status")
                         
                         with st.spinner("Checking training status..."):
                             import time
@@ -251,7 +259,7 @@ with tab2:
                                         st.metric("Loss", "Calculating...")
                                 
                                 model_version = status_data.get('model_version', 'v2')
-                                st.success(f"✓ Model Updated to Version {model_version}")
+                                st.success(f"Model Updated to Version {model_version}")
                                 
                                 if status_data['status'] == 'completed':
                                     st.balloons()
@@ -267,7 +275,7 @@ with tab2:
 # TAB 3: MODEL INFO
 # ============================================================================
 with tab3:
-    st.header("📊 Model Information")
+    st.header("Model Information")
     
     info_col1, info_col2 = st.columns(2)
     
@@ -305,21 +313,21 @@ with tab3:
 # TAB 4: ADMIN
 # ============================================================================
 with tab4:
-    st.header("🛠️ Admin & Status")
+    st.header("Admin & Status")
     
     if st.button("🔍 Check API Health"):
         if api_healthy:
             try:
                 response = requests.get(f"{API_URL}/health", timeout=5)
                 data = response.json()
-                st.success("✅ API is healthy")
+                st.success("API is healthy")
                 st.json(data)
             except Exception as e:
                 st.error(f"Error: {e}")
         else:
-            st.error("❌ API not available")
+            st.error("API not available")
     
-    if st.button("📋 View Retrain Jobs"):
+    if st.button("View Retrain Jobs"):
         if api_healthy:
             try:
                 response = requests.get(f"{API_URL}/retrain_jobs", timeout=5)
@@ -328,7 +336,7 @@ with tab4:
             except Exception as e:
                 st.error(f"Error: {e}")
         else:
-            st.error("❌ API not available")
+            st.error("API not available")
     
     st.divider()
     
