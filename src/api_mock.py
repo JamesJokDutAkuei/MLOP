@@ -1,5 +1,6 @@
 """
 Simple Mock API for testing UI without TensorFlow
+Version: 1.0.1 - Fixed Render deployment
 """
 from fastapi import FastAPI, File, UploadFile
 from pydantic import BaseModel
