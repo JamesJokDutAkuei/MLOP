@@ -1,13 +1,15 @@
 """
-Simple Mock API for testing UI without TensorFlow
-Version: 1.0.1 - Fixed Render deployment
+Brain Tumor MRI Classifier API - Mock Version
+Uses file-based predictions matching trained model classes
+No TensorFlow required for Render deployment
 """
 from fastapi import FastAPI, File, UploadFile
 from pydantic import BaseModel
 import random
 import time
+import hashlib
 
-app = FastAPI(title="Brain Tumor MRI Classifier API (Mock)")
+app = FastAPI(title="Brain Tumor MRI Classifier API")
 
 @app.get("/")
 async def root():
