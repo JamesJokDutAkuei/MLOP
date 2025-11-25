@@ -10,12 +10,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Apply white background theme
+# Apply white background theme with stronger CSS
 st.markdown("""
     <style>
-        body { background-color: #FFFFFF; color: #000000; }
-        .stApp { background-color: #FFFFFF; }
-        [data-testid="stAppViewContainer"] { background-color: #FFFFFF; }
+        * { background-color: #FFFFFF !important; color: #000000 !important; }
+        body { background-color: #FFFFFF !important; }
+        .stApp { background-color: #FFFFFF !important; }
+        [data-testid="stAppViewContainer"] { background-color: #FFFFFF !important; }
+        .stTabs { background-color: #FFFFFF !important; }
+        div { background-color: transparent !important; }
     </style>
     """, unsafe_allow_html=True)
 
