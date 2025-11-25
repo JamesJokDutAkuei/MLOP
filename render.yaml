@@ -3,6 +3,6 @@ services:
     name: brain-tumor-api
     env: docker
     dockerfilePath: ./Dockerfile
-    port: 8000
+    ports:
+      - port: 8000
     autoDeploy: true
-    region: oregon
