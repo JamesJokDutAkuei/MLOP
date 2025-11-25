@@ -142,8 +142,8 @@ with tab1:
                     
                     except Exception as e:
                         st.error(f"Error: {str(e)}")
-        elif not api_healthy:
-            st.info("⚠️ API not available. Start the API server first: `python src/api.py`")
+        else:
+            st.info("⚠️ Upload an image to get started")
 
 # ============================================================================
 # TAB 2: UPLOAD & RETRAIN
