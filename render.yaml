@@ -3,4 +3,5 @@ services:
     name: brain-tumor-api
     env: docker
     dockerfilePath: ./Dockerfile
+    plan: free
     autoDeploy: true
