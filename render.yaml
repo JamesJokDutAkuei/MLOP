@@ -4,5 +4,5 @@ services:
     env: docker
     dockerfilePath: ./Dockerfile
     port: 8000
-    autoDeploy: on
+    autoDeploy: true
     region: oregon
