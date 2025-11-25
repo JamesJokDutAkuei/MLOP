@@ -30,16 +30,16 @@ import matplotlib.pyplot as plt
 import os
 
 # API Configuration - Auto-detect environment
-# Render deployment: use GCP_API_URL env var
+# Render deployment: use new brain-tumor-api service
 # Docker deployment: use nginx
 # Local deployment: use localhost
 if os.getenv("GCP_API_URL"):
-    API_URL = os.getenv("GCP_API_URL")  # Render cloud deployment
+    API_URL = os.getenv("GCP_API_URL")  # Use env var if set (legacy)
 elif os.getenv("DOCKER_ENV") == "true":
     API_URL = "http://nginx:80"  # Docker internal network
 else:
-    # Local development
-    API_URL = "http://127.0.0.1:8000"
+    # Render cloud deployment - new brain-tumor-api service
+    API_URL = "https://brain-tumor-api.onrender.com"
 
 @st.cache_data(ttl=60)
 def check_api_health():
