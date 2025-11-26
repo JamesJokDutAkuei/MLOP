@@ -12,8 +12,6 @@ pillow==10.4.0
 matplotlib>=3.8.0
 seaborn>=0.13.0
 
-# Lightweight inference runtime
-tflite-runtime==2.13.0
 
 # HTTP & utilities
 requests==2.31.0
