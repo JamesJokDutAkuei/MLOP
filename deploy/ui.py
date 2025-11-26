@@ -2,6 +2,8 @@
 Streamlit Web UI for Brain Tumor MRI Classifier - FIXED VERSION
 """
 
+UI_VERSION = "ui-1.1.0"
+
 import streamlit as st
 
 st.set_page_config(
@@ -73,6 +75,7 @@ api_healthy = update_api_status()
 with st.sidebar:
     st.caption("API Endpoint")
     st.code(API_URL, language="text")
+    st.caption(f"UI Version: {UI_VERSION}")
 
 # Main tabs
 tab1, tab_vis, tab2, tab3, tab4 = st.tabs([
