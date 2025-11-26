@@ -2,7 +2,7 @@
 Streamlit Web UI for Brain Tumor MRI Classifier - FIXED VERSION
 """
 
-UI_VERSION = "ui-1.1.0"
+UI_VERSION = "ui-1.2.0"
 
 import streamlit as st
 
@@ -12,17 +12,52 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Apply white background theme with stronger CSS
-st.markdown("""
-    <style>
-        * { background-color: #FFFFFF !important; color: #000000 !important; }
-        body { background-color: #FFFFFF !important; }
-        .stApp { background-color: #FFFFFF !important; }
-        [data-testid="stAppViewContainer"] { background-color: #FFFFFF !important; }
-        .stTabs { background-color: #FFFFFF !important; }
-        div { background-color: transparent !important; }
-    </style>
-    """, unsafe_allow_html=True)
+# Modern, readable styling
+st.markdown(
+        """
+        <style>
+            /* Base backgrounds */
+            .stApp, [data-testid="stAppViewContainer"], body { background: #ffffff; }
+
+            /* Cards */
+            .card {
+                border: 1px solid #e6e9ef;
+                border-radius: 12px;
+                background: #ffffff;
+                box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+                padding: 16px 18px;
+                margin-bottom: 16px;
+            }
+            .card-header {
+                font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;
+            }
+            .subtle {
+                color: #667085; font-size: 0.92rem; margin-top: -4px; margin-bottom: 8px;
+            }
+
+            /* Buttons */
+            .stButton > button {
+                border: 1px solid #d0d5dd !important;
+                border-radius: 10px !important;
+                padding: 0.5rem 0.9rem !important;
+                box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05) !important;
+            }
+
+            /* File uploader */
+            [data-testid="stFileUploader"] {
+                border: 1px dashed #d0d5dd; border-radius: 12px; padding: 10px 12px;
+                background: #fafafa;
+            }
+
+            /* Images */
+            .stImage img { border-radius: 10px; border: 1px solid #e6e9ef; }
+
+            /* Metrics */
+            [data-testid="stMetric"] { border: 1px solid #e6e9ef; border-radius: 12px; padding: 8px 10px; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+)
 
 import requests
 import pandas as pd
@@ -30,6 +65,18 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 import os
+
+# UI helpers
+def card_open(title=None, subtitle=None):
+    seg = '<div class="card">'
+    if title:
+        seg += f'<div class="card-header">{title}</div>'
+    if subtitle:
+        seg += f'<div class="subtle">{subtitle}</div>'
+    st.markdown(seg, unsafe_allow_html=True)
+
+def card_close():
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # API Configuration - Auto-detect environment
 # Render deployment: use new brain-tumor-api service
@@ -96,7 +143,7 @@ with tab1:
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.subheader("Upload Image")
+        card_open("Upload Image", "JPG or PNG recommended")
         uploaded_file = st.file_uploader(
             "Choose an image",
             type=["jpg", "jpeg", "png"],
@@ -106,9 +153,10 @@ with tab1:
         if uploaded_file is not None:
             image = Image.open(uploaded_file)
             st.image(image, use_column_width=True, caption="Uploaded Image")
+        card_close()
     
     with col2:
-        st.subheader("Prediction Result")
+        card_open("Prediction Result", "Model output and confidence")
         
         if uploaded_file is not None:
             if st.button("Predict", key="predict_btn"):
@@ -171,6 +219,7 @@ with tab1:
                         st.error(f"Error: {str(e)}")
         else:
             st.info("Upload an image to get started")
+            card_close()
 
 # ============================================================================
 # TAB 2: UPLOAD & RETRAIN
@@ -182,7 +231,7 @@ with tab2:
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.subheader("Upload Images")
+        card_open("Upload Images", "Store under data/uploads/{label}/")
         
         disease_label = st.selectbox(
             "Select disease class",
@@ -215,9 +264,10 @@ with tab2:
                             st.error(f"Upload failed: {response.text}")
                     except Exception as e:
                         st.error(f"Error: {str(e)}")
+        card_close()
     
     with col2:
-        st.subheader("Trigger Retraining")
+        card_open("Trigger Retraining", "Starts a mock training job")
         
         epochs = st.slider("Training Epochs", 1, 20, 5)
         batch_size = st.slider("Batch Size", 8, 64, 32)
@@ -289,6 +339,7 @@ with tab2:
                         st.error(f"Failed: {response.text}")
                 except Exception as e:
                     st.error(f"Error: {str(e)}")
+            card_close()
 
 # ============================================================================
 # TAB 3: MODEL INFO
@@ -299,7 +350,7 @@ with tab3:
     info_col1, info_col2 = st.columns(2)
     
     with info_col1:
-        st.subheader("Model Details")
+        card_open("Model Details")
         st.write("""
         - **Framework**: TensorFlow/Keras
         - **Architecture**: MobileNetV2
@@ -308,25 +359,28 @@ with tab3:
         - **Optimizer**: Adam
         - **Loss**: Categorical Crossentropy
         """)
+        card_close()
     
     with info_col2:
-        st.subheader("Classes")
+        card_open("Classes")
         st.write("""
         1. **Glioma Tumor** - Most common brain tumor
         2. **Meningioma Tumor** - Tumor of brain membrane
         3. **Pituitary Tumor** - Hormone-producing tumor
         4. **No Tumor** - Healthy brain
         """)
+        card_close()
     
     st.divider()
     
-    st.subheader("Performance Metrics")
+    card_open("Performance Metrics")
     st.write("""
     - **Accuracy**: 96%+
     - **Precision**: 95%+
     - **Recall**: 94%+
     - **F1-Score**: 94%+
     """)
+    card_close()
 
 # ============================================================================
 # TAB 4: ADMIN
@@ -334,6 +388,7 @@ with tab3:
 with tab4:
     st.header("Admin & Status")
     
+    card_open("API Health")
     if st.button("🔍 Check API Health"):
         if api_healthy:
             try:
@@ -345,7 +400,9 @@ with tab4:
                 st.error(f"Error: {e}")
         else:
             st.error("API not available")
-    
+    card_close()
+
+    card_open("Retrain Jobs")
     if st.button("View Retrain Jobs"):
         if api_healthy:
             try:
@@ -356,15 +413,17 @@ with tab4:
                 st.error(f"Error: {e}")
         else:
             st.error("API not available")
-    
+    card_close()
+
     st.divider()
     
-    st.subheader("📝 Logs")
+    card_open("📝 Logs")
     st.write("""
     API logs are available at:
     - File: `/Users/apple/MLOP/logs/api.log`
     - Training artifacts in: `/Users/apple/MLOP/logs/`
     """)
+    card_close()
 
 # ============================================================================
 # TAB VISUALIZATIONS
@@ -380,30 +439,33 @@ with tab_vis:
                 data = resp.json()
 
                 # Class distribution
-                st.subheader("Class Distribution")
+                card_open("Class Distribution")
                 cd = data.get("class_distribution", {})
                 if cd:
                     df = pd.DataFrame({"Class": list(cd.keys()), "Count": list(cd.values())})
                     st.bar_chart(df.set_index("Class"))
                 else:
                     st.info("No class distribution available.")
+                card_close()
 
                 # Average brightness
-                st.subheader("Average Brightness by Class")
+                card_open("Average Brightness by Class")
                 ab = data.get("avg_brightness_by_class", {})
                 if ab:
                     df2 = pd.DataFrame({"Class": list(ab.keys()), "Brightness": list(ab.values())})
                     st.bar_chart(df2.set_index("Class"))
                 else:
                     st.info("No brightness stats available.")
+                card_close()
 
                 # Resolution
-                st.subheader("Average Image Resolution")
+                card_open("Average Image Resolution")
                 ar = data.get("avg_resolution", {})
                 w = ar.get("width", 0)
                 h = ar.get("height", 0)
                 st.metric("Avg Width", w)
                 st.metric("Avg Height", h)
+                card_close()
             else:
                 st.error(f"Failed to fetch dataset stats ({resp.status_code}).")
         except Exception as e:
