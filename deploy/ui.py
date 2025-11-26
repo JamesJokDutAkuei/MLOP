@@ -19,6 +19,15 @@ st.markdown(
             /* Base backgrounds */
             .stApp, [data-testid="stAppViewContainer"], body { background: #ffffff; }
 
+            /* Base text color to ensure readability on white */
+            body, .stApp, [data-testid="stAppViewContainer"], .stMarkdown, .stText,
+            [data-testid="stSidebar"], [data-testid="stSidebar"] *,
+            p, span, li, label { color: #1f2937 !important; }
+            h1, h2, h3, h4, h5, h6 { color: #111827 !important; }
+            a { color: #1f77b4 !important; }
+            a:hover { color: #174a7a !important; }
+            [data-testid="stTabs"] button div p { color: #344054 !important; }
+
             /* Cards */
             .card {
                 border: 1px solid #e6e9ef;
@@ -41,19 +50,24 @@ st.markdown(
                 border-radius: 10px !important;
                 padding: 0.5rem 0.9rem !important;
                 box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05) !important;
+                background: #f8fafc !important;
+                color: #1f2937 !important;
             }
+            .stButton > button:hover { background: #eef2f7 !important; }
 
             /* File uploader */
             [data-testid="stFileUploader"] {
                 border: 1px dashed #d0d5dd; border-radius: 12px; padding: 10px 12px;
                 background: #fafafa;
             }
+            [data-testid="stFileUploader"] * { color: #1f2937 !important; }
 
             /* Images */
             .stImage img { border-radius: 10px; border: 1px solid #e6e9ef; }
 
             /* Metrics */
             [data-testid="stMetric"] { border: 1px solid #e6e9ef; border-radius: 12px; padding: 8px 10px; }
+            [data-testid="stMetric"] * { color: #111827 !important; }
         </style>
         """,
         unsafe_allow_html=True,
