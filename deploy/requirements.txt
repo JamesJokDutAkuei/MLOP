@@ -5,6 +5,13 @@ uvicorn==0.23.2
 # Web Framework - UI
 streamlit==1.28.0
 
+# Data science & image processing
+pandas==2.0.3
+numpy==1.24.3
+pillow==10.0.0
+matplotlib==3.7.2
+seaborn==0.12.2
+
 # HTTP & utilities
 requests==2.31.0
 python-multipart==0.0.6
