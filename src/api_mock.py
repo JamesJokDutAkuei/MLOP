@@ -6,10 +6,13 @@ No TensorFlow required for Render deployment
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List, Optional
 import time
 from io import BytesIO
 from PIL import Image
 import numpy as np
+import os
+from pathlib import Path
 
 app = FastAPI(title="Brain Tumor MRI Classifier API")
 
@@ -34,6 +37,11 @@ class PredictionResponse(BaseModel):
     probabilities: dict
     inference_time_ms: float
 
+class UploadResponse(BaseModel):
+    uploaded_count: int
+    saved_path: str
+    message: str
+
 @app.get("/health")
 async def health():
     return {
@@ -42,6 +50,14 @@ async def health():
         "model_version": "v1",
         "uptime_seconds": 100
     }
+
+# ----------------------------------------------------------------------------
+# In-memory metrics
+# ----------------------------------------------------------------------------
+REQUEST_COUNT = 0
+TOTAL_INFERENCE_MS = 0.0
+LAST_LATENCIES: List[float] = []
+CLASS_COUNTS = {"Glioma": 0, "Meningioma": 0, "Pituitary": 0, "No_Tumor": 0}
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(file: UploadFile = File(...)):
@@ -115,7 +131,7 @@ async def predict(file: UploadFile = File(...)):
 
     inference_time = (time.time() - start) * 1000
 
-    return PredictionResponse(
+    result = PredictionResponse(
         predicted_class=f"{classes[predicted_idx]} Tumor" if predicted_idx != 3 else "No_Tumor",
         predicted_class_short=class_short[predicted_idx],
         class_index=predicted_idx,
@@ -123,6 +139,17 @@ async def predict(file: UploadFile = File(...)):
         probabilities=probs,
         inference_time_ms=inference_time
     )
+
+    # update metrics
+    global REQUEST_COUNT, TOTAL_INFERENCE_MS, LAST_LATENCIES, CLASS_COUNTS
+    REQUEST_COUNT += 1
+    TOTAL_INFERENCE_MS += inference_time
+    LAST_LATENCIES.append(inference_time)
+    if len(LAST_LATENCIES) > 5:
+        LAST_LATENCIES = LAST_LATENCIES[-5:]
+    CLASS_COUNTS[result.predicted_class_short] = CLASS_COUNTS.get(result.predicted_class_short, 0) + 1
+
+    return result
 
 @app.post("/retrain")
 async def retrain(epochs: int = 5, batch_size: int = 32, learning_rate: float = 0.00001):
@@ -153,6 +180,67 @@ async def retrain_jobs():
     return {
         "total_jobs": 1,
         "jobs": {}
+    }
+
+@app.get("/metrics")
+async def metrics():
+    avg_latency = (TOTAL_INFERENCE_MS / REQUEST_COUNT) if REQUEST_COUNT > 0 else 0.0
+    return {
+        "request_count": REQUEST_COUNT,
+        "avg_inference_ms": avg_latency,
+        "last_5_latencies_ms": LAST_LATENCIES,
+        "class_counts": CLASS_COUNTS,
+    }
+
+@app.post("/upload_training_data", response_model=UploadResponse)
+async def upload_training_data(label: str, files: List[UploadFile] = File(...)):
+    """Accept multiple images and store under data/uploads/{label}/"""
+    base_dir = Path("data/uploads") / label
+    base_dir.mkdir(parents=True, exist_ok=True)
+    saved = 0
+    for f in files:
+        try:
+            content = await f.read()
+            # ensure filename
+            name = f.filename or f"upload_{int(time.time()*1000)}.jpg"
+            out_path = base_dir / name
+            with open(out_path, "wb") as out:
+                out.write(content)
+            saved += 1
+        except Exception:
+            continue
+    return UploadResponse(
+        uploaded_count=saved,
+        saved_path=str(base_dir),
+        message="Files uploaded successfully" if saved > 0 else "No files saved"
+    )
+
+@app.get("/dataset_stats")
+async def dataset_stats():
+    """Return basic dataset statistics for visualizations."""
+    stats_path = Path("data/dataset_stats.json")
+    if stats_path.exists():
+        import json
+        with open(stats_path, "r") as f:
+            return json.load(f)
+    # Fallback minimal stats
+    return {
+        "class_distribution": {
+            "Glioma": 1000,
+            "Meningioma": 1000,
+            "Pituitary": 1000,
+            "No_Tumor": 1000
+        },
+        "avg_brightness_by_class": {
+            "Glioma": 0.42,
+            "Meningioma": 0.45,
+            "Pituitary": 0.47,
+            "No_Tumor": 0.51
+        },
+        "avg_resolution": {
+            "width": 224,
+            "height": 224
+        }
     }
 
 if __name__ == '__main__':

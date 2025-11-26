@@ -172,6 +172,9 @@ Run flood request simulation:
 
 ```bash
 locust -f locustfile.py --host=http://localhost:8000 --users=100 --spawn-rate=10 --run-time=1m
+
+# If your sample image is elsewhere, set SAMPLE_IMAGE
+SAMPLE_IMAGE=/path/to/test.jpg locust -f locustfile.py --host=http://localhost:8000 --users=100 --spawn-rate=10 --run-time=1m
 ```
 
 Results (CSV + HTML) are saved to `logs/locust_results/`.
@@ -352,10 +355,8 @@ Check API health and model status.
    - Display Grad-CAM heatmap for interpretability
 
 2. **📊 Visualizations**
-   - Class distribution (pie chart)
-   - Average brightness per class
-   - Image resolution distribution
-   - Sample images from each class
+  - Class distribution, brightness, and resolution from `/dataset_stats`
+  - Displays charts directly in the UI
 
 3. **📤 Upload & Retrain**
    - Bulk upload multiple images
@@ -382,6 +383,20 @@ Check API health and model status.
    - Logs metrics
 4. **UI polls status** → shows progress
 5. **Model auto-reloaded** in API once training completes
+
+---
+
+## ✅ Assignment Coverage Checklist
+
+- Model pipeline (data acquisition, preprocessing, training, testing) – in `notebook/brain_tumor_mri.ipynb` and `src/`
+- Offline evaluation with metrics and visualizations – in notebook (confusion matrix, per-class metrics)
+- API creation – FastAPI mock API in `src/api_mock.py` with `/predict`, `/retrain`, `/retrain_status`, `/retrain_jobs`, `/upload_training_data`, `/metrics`, `/dataset_stats`
+- UI – Streamlit in `deploy/ui.py`: Predict, Visualizations, Upload & Retrain, Model Info, Admin (uptime)
+- Deployment – Docker (root `Dockerfile`, `deploy/Dockerfile.api`, `deploy/Dockerfile.ui`), Render setup
+- Load testing – `locustfile.py` + instructions; supports scaling via `docker-compose.yml` and Nginx
+- Smoke tests – `scripts/smoke_test.py`
+
+---
 
 ---
 

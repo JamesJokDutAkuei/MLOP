@@ -75,8 +75,9 @@ with st.sidebar:
     st.code(API_URL, language="text")
 
 # Main tabs
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab_vis, tab2, tab3, tab4 = st.tabs([
     "Predict",
+    "Visualizations",
     "Upload & Retrain",
     "Model Info",
     "Admin"
@@ -361,3 +362,48 @@ with tab4:
     - File: `/Users/apple/MLOP/logs/api.log`
     - Training artifacts in: `/Users/apple/MLOP/logs/`
     """)
+
+# ============================================================================
+# TAB VISUALIZATIONS
+# ============================================================================
+with tab_vis:
+    st.header("Dataset Visualizations")
+    st.markdown("Class distribution, average brightness, and resolution from the dataset stats.")
+
+    if api_healthy:
+        try:
+            resp = requests.get(f"{API_URL}/dataset_stats", timeout=15)
+            if resp.status_code == 200 and resp.headers.get("content-type", "").startswith("application/json"):
+                data = resp.json()
+
+                # Class distribution
+                st.subheader("Class Distribution")
+                cd = data.get("class_distribution", {})
+                if cd:
+                    df = pd.DataFrame({"Class": list(cd.keys()), "Count": list(cd.values())})
+                    st.bar_chart(df.set_index("Class"))
+                else:
+                    st.info("No class distribution available.")
+
+                # Average brightness
+                st.subheader("Average Brightness by Class")
+                ab = data.get("avg_brightness_by_class", {})
+                if ab:
+                    df2 = pd.DataFrame({"Class": list(ab.keys()), "Brightness": list(ab.values())})
+                    st.bar_chart(df2.set_index("Class"))
+                else:
+                    st.info("No brightness stats available.")
+
+                # Resolution
+                st.subheader("Average Image Resolution")
+                ar = data.get("avg_resolution", {})
+                w = ar.get("width", 0)
+                h = ar.get("height", 0)
+                st.metric("Avg Width", w)
+                st.metric("Avg Height", h)
+            else:
+                st.error(f"Failed to fetch dataset stats ({resp.status_code}).")
+        except Exception as e:
+            st.error(f"Error: {e}")
+    else:
+        st.info("API not available yet — check again in a moment.")
