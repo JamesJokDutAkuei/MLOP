@@ -2,18 +2,18 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy requirements
-COPY deploy/requirements.txt .
+# Copy requirements (Dockerfile is in deploy/ but context is repo root)
+COPY deploy/requirements.txt requirements.txt
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy only necessary files
-COPY deploy/ui.py deploy/
+# Copy UI files
+COPY deploy/ui.py ui.py
 COPY .streamlit/ .streamlit/
 
 # Expose port
 EXPOSE 8501
 
 # Run Streamlit
-CMD ["streamlit", "run", "deploy/ui.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "ui.py", "--server.port=8501", "--server.address=0.0.0.0"]
