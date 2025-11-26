@@ -4,12 +4,22 @@ Uses file-based predictions matching trained model classes
 No TensorFlow required for Render deployment
 """
 from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import random
 import time
 import hashlib
 
 app = FastAPI(title="Brain Tumor MRI Classifier API")
+
+# Allow cross-origin requests (useful if a browser calls the API directly)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():

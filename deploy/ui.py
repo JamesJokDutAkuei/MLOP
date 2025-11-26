@@ -69,6 +69,10 @@ def update_api_status():
         return False
 
 api_healthy = update_api_status()
+# Show current API endpoint for debugging/visibility
+with st.sidebar:
+    st.caption("API Endpoint")
+    st.code(API_URL, language="text")
 
 # Main tabs
 tab1, tab2, tab3, tab4 = st.tabs([
@@ -106,14 +110,18 @@ with tab1:
             if st.button("Predict", key="predict_btn"):
                 with st.spinner("Analyzing image... (may take 30+ seconds on first request)"):
                     try:
-                        files = {"file": uploaded_file.getvalue()}
+                        # Provide filename and content-type for FastAPI UploadFile parsing
+                        file_bytes = uploaded_file.getvalue()
+                        mime = getattr(uploaded_file, "type", None) or "image/jpeg"
+                        files = {"file": (uploaded_file.name or "upload.jpg", file_bytes, mime)}
                         response = requests.post(
                             f"{API_URL}/predict",
                             files=files,
                             timeout=60  # Longer timeout for Render cold start
                         )
                         
-                        if response.status_code == 200:
+                        # Prefer JSON; if HTML returned, surface a clearer message
+                        if response.status_code == 200 and response.headers.get("content-type", "").startswith("application/json"):
                             result = response.json()
                             
                             st.success("Prediction Complete!")
@@ -149,7 +157,11 @@ with tab1:
                             ax.set_title('Prediction Confidence by Class', fontweight='bold')
                             st.pyplot(fig, use_container_width=True)
                         else:
-                            st.error(f"Prediction failed: {response.text}")
+                            ct = response.headers.get("content-type", "")
+                            if "html" in ct.lower():
+                                st.error("Prediction failed: received HTML page instead of JSON. This usually means the API URL is incorrect or the API is still waking up. Please retry in 30s.")
+                            else:
+                                st.error(f"Prediction failed ({response.status_code}): {response.text}")
                     
                     except Exception as e:
                         st.error(f"Error: {str(e)}")
