@@ -5,11 +5,3 @@ services:
     dockerfilePath: ./Dockerfile
     plan: free
     autoDeploy: true
-
-  - type: web
-    name: mlop-ui
-    env: docker
-    dockerfilePath: ./deploy/Dockerfile.ui
-    plan: free
-    autoDeploy: true
-
