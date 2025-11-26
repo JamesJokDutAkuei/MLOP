@@ -68,6 +68,24 @@ st.markdown(
             /* Metrics */
             [data-testid="stMetric"] { border: 1px solid #e6e9ef; border-radius: 12px; padding: 8px 10px; }
             [data-testid="stMetric"] * { color: #111827 !important; }
+
+            /* JSON / API response blocks */
+            [data-testid="stJson"] pre, [data-testid="stJson"] code, .stMarkdown pre, .stMarkdown code {
+                background: #ffffff !important;
+                color: #1f2937 !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 8px !important;
+                padding: 12px 14px !important;
+                font-size: 13px !important;
+                line-height: 1.4 !important;
+                box-shadow: 0 1px 2px rgba(16,24,40,0.05);
+            }
+            /* JSON syntax coloring (approximate) */
+            [data-testid="stJson"] .kvKey, [data-testid="stJson"] .json-object-key { color: #0f609b !important; font-weight: 600; }
+            [data-testid="stJson"] .string { color: #b93815 !important; }
+            [data-testid="stJson"] .number { color: #085d73 !important; }
+            [data-testid="stJson"] .boolean { color: #7f4f24 !important; font-weight: 600; }
+            [data-testid="stJson"] .null { color: #6941c6 !important; font-style: italic; }
         </style>
         """,
         unsafe_allow_html=True,
