@@ -6,7 +6,6 @@ No TensorFlow required for Render deployment
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import random
 import time
 from io import BytesIO
 from PIL import Image
