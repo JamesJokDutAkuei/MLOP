@@ -8,7 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import random
 import time
-import hashlib
+from io import BytesIO
+from PIL import Image
+import numpy as np
 
 app = FastAPI(title="Brain Tumor MRI Classifier API")
 
@@ -51,25 +53,71 @@ async def predict(file: UploadFile = File(...)):
     contents = await file.read()
     
     # Mock prediction based on file hash
-    file_hash = hash(contents) % 4
+    # Load image safely
+    try:
+        img = Image.open(BytesIO(contents)).convert("L")  # grayscale
+    except Exception:
+        # Fallback to previous random behavior if image cannot be parsed
+        file_hash = hash(contents) % 4
+        classes = ["Glioma", "Meningioma", "Pituitary", "No_Tumor"]
+        class_short = ["Glioma", "Meningioma", "Pituitary", "No_Tumor"]
+        probs = [0.1, 0.1, 0.1, 0.1]
+        probs[file_hash] = 0.7
+        total = sum(probs)
+        probs = {class_short[i]: float(probs[i]/total) for i in range(4)}
+        inference_time = (time.time() - start) * 1000
+        return PredictionResponse(
+            predicted_class=f"{classes[file_hash]} Tumor",
+            predicted_class_short=class_short[file_hash],
+            class_index=file_hash,
+            confidence=max(probs.values()),
+            probabilities=probs,
+            inference_time_ms=inference_time
+        )
+
+    # Resize to standard size for consistent stats
+    img = img.resize((256, 256))
+    arr = np.asarray(img, dtype=np.float32) / 255.0
+
+    # Basic stats
+    mean_intensity = float(arr.mean())
+    var_intensity = float(arr.var())
+
+    # Edge density via gradient magnitudes
+    gx = np.abs(arr[:, 1:] - arr[:, :-1])
+    gy = np.abs(arr[1:, :] - arr[:-1, :])
+    grad_mag = np.pad(gx, ((0,0),(0,1))) + np.pad(gy, ((0,1),(0,0)))
+    edge_density = float((grad_mag > 0.08).mean())  # threshold tuned lightly
+
+    # Feature-driven class mapping (deterministic)
+    # Heuristic rationale (very rough):
+    # - Higher edge density & variance -> likely tumor structures
+    # - Lower variance & smoother textures -> No_Tumor
+    # - Medium variance with moderate edges -> Pituitary/Meningioma buckets
     classes = ["Glioma", "Meningioma", "Pituitary", "No_Tumor"]
     class_short = ["Glioma", "Meningioma", "Pituitary", "No_Tumor"]
-    
-    predicted_idx = file_hash
-    
-    # Generate mock probabilities
-    probs = [random.uniform(0, 0.3) for _ in range(4)]
-    probs[predicted_idx] = random.uniform(0.7, 0.99)
+
+    if edge_density > 0.18 and var_intensity > 0.035:
+        predicted_idx = 0  # Glioma
+    elif edge_density > 0.14 and var_intensity > 0.025:
+        predicted_idx = 1  # Meningioma
+    elif var_intensity > 0.02 and mean_intensity > 0.45:
+        predicted_idx = 2  # Pituitary
+    else:
+        predicted_idx = 3  # No_Tumor
+
+    # Construct probabilities with softmax-like shaping around selected class
+    base = np.array([0.15, 0.15, 0.15, 0.15], dtype=np.float32)
+    # Increase confidence based on feature strength
+    strength = float(0.6 + 0.4 * np.clip(edge_density*2 + var_intensity*5, 0, 1))
+    base[predicted_idx] = strength
+    probs = base / base.sum()
     probs = {class_short[i]: float(probs[i]) for i in range(4)}
-    
-    # Normalize
-    total = sum(probs.values())
-    probs = {k: v/total for k, v in probs.items()}
-    
+
     inference_time = (time.time() - start) * 1000
-    
+
     return PredictionResponse(
-        predicted_class=f"{classes[predicted_idx]} Tumor",
+        predicted_class=f"{classes[predicted_idx]} Tumor" if predicted_idx != 3 else "No_Tumor",
         predicted_class_short=class_short[predicted_idx],
         class_index=predicted_idx,
         confidence=max(probs.values()),
