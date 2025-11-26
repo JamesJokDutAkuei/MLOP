@@ -38,8 +38,8 @@ if os.getenv("GCP_API_URL"):
 elif os.getenv("DOCKER_ENV") == "true":
     API_URL = "http://nginx:80"  # Docker internal network
 else:
-    # Render cloud deployment - new brain-tumor-api service
-    API_URL = "https://brain-tumor-api-xc9w.onrender.com"
+    # Render cloud deployment - brain-tumor-api service
+    API_URL = os.getenv("API_URL", "https://brain-tumor-api-xc9w.onrender.com")
 
 @st.cache_data(ttl=60)
 def check_api_health():

@@ -5,12 +5,15 @@ uvicorn==0.23.2
 # Web Framework - UI
 streamlit==1.28.0
 
-# Data science & image processing (Python 3.13 compatible versions)
+# Data science & image processing (lightweight)
 pandas>=2.1.0
-numpy>=1.26.0
-pillow>=10.1.0
+numpy==1.26.4
+pillow==10.4.0
 matplotlib>=3.8.0
 seaborn>=0.13.0
+
+# Lightweight inference runtime
+tflite-runtime==2.13.0
 
 # HTTP & utilities
 requests==2.31.0
