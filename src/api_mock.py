@@ -25,9 +25,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+APP_VERSION = "mock-1.1.0"
+
 @app.get("/")
 async def root():
-    return {"message": "Brain Tumor MRI Classifier API", "status": "running"}
+    return {"message": "Brain Tumor MRI Classifier API", "status": "running", "version": APP_VERSION}
 
 class PredictionResponse(BaseModel):
     predicted_class: str
