@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 libstd
 # Copy source code
 COPY ./src ./src
 
+# Copy models (includes .h5 and .tflite if present)
+COPY ./models ./models
+
 # Expose port
 EXPOSE 8000
 
