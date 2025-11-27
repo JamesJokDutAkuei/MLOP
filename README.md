@@ -4,7 +4,7 @@ Quick Links
 - GitHub Repo: https://github.com/JamesJokDutAkuei/MLOP
 - Video Demo: https://youtu.be/A5EAaL5gIAI
 - Deployed API: https://brain-tumor-api-xc9w.onrender.com
-- Streamlit UI: Refer to Render UI service URL or run locally (`streamlit run deploy/ui.py`)
+- Streamlit UI: https://mlop-ui.onrender.com (or run locally: `streamlit run deploy/ui.py`)
 
 ## 📋 Project Overview
 
@@ -65,7 +65,7 @@ brain-tumor-mri-classification/
 │   └── uploads/                       # User-uploaded files for retraining
 │
 ├── models/
-│   ├── cassava_model_v1.h5            # Trained model
+│   ├── brain_tumor_model_v1.h5        # Trained model
 │   ├── model_metadata.json            # Model version & metrics
 │   └── model_checkpoints/             # Training checkpoints
 │
@@ -100,9 +100,9 @@ pip install -r requirements.txt
 python src/data_acquisition.py
 ```
 
-This script downloads the Brain Tumor MRI dataset from Kaggle (~7k images, 4 classes) into `data/train` and `data/test`.
+This script prepares folders for the Brain Tumor MRI dataset (~7k images, 4 classes) into `data/train` and `data/test`.
 
-> **Note:** Requires Kaggle API key. See [Kaggle API Setup](https://github.com/Kaggle/kaggle-api#api-credentials)
+> Note: If using Kaggle, ensure API credentials are configured. Dataset: https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset
 
 ### 3. **Train Model (Jupyter Notebook)**
 
@@ -118,16 +118,18 @@ The notebook includes:
 - Evaluation metrics (accuracy, precision, recall, F1, ROC-AUC)
 - Visualizations: confusion matrix, class distribution, sample images, Grad-CAM interpretability
 
-**Expected Results:**
-- ~95% validation accuracy
-- Model saved to `models/cassava_model_v1.h5`
+**Expected Results & Artifacts:**
+- Trained model saved to `models/brain_tumor_model_v1.h5`
+- Metadata with exact metrics saved to `models/model_metadata.json`
+- Plots saved in `logs/` (confusion matrix, per-class metrics, training history, Grad-CAM)
+- See the Results section below for file paths
 
 ### 4. **Run Locally (API + UI)**
 
-**Start API Server:**
+**Start API Server (mock):**
 
 ```bash
-python src/api.py
+python src/api_mock.py
 # API runs on http://localhost:8000
 # Swagger UI: http://localhost:8000/docs
 ```
@@ -162,15 +164,15 @@ This runs 4 API containers behind Nginx for load distribution.
 
 ### 6. **☁️ Cloud Deployment (Render)**
 
-Deploy to **Render** - FREE cloud platform, NO BILLING REQUIRED:
+Deploy to **Render**:
 
-**Step 1:** Push to GitHub (see `GITHUB_SETUP.md`)
+1. Push to GitHub and connect the repo to Render.
+2. Create two services: API (Docker) and UI (Docker or Python), using the provided Dockerfiles.
+3. Enable auto-deploy on push.
 
-**Step 2:** Follow `RENDER_QUICK_START.md` (5 minutes, no configuration needed)
-
-Your app will be live at:
-- **UI**: `https://mlop-ui-xxxxx.onrender.com`
-- **API**: `https://mlop-api-xxxxx.onrender.com`
+Live URLs:
+- **UI**: https://mlop-ui.onrender.com
+- **API**: https://brain-tumor-api-xc9w.onrender.com
 
 ### 7. **Load Testing with Locust**
 
@@ -186,6 +188,46 @@ SAMPLE_IMAGE=/path/to/test.jpg locust -f locustfile.py --host=http://localhost:8
 Results (CSV + HTML) are saved to `logs/locust_results/`.
 
 ---
+
+## 🧪 Results (from executed notebook)
+
+- Model: `models/brain_tumor_model_v1.h5`
+- Metadata: `models/model_metadata.json` (includes accuracy, loss, precision, recall, F1, ROC-AUC)
+- Plots (saved by notebook):
+  - `logs/confusion_matrix.png`
+  - `logs/per_class_metrics.png`
+  - `logs/training_history.png`
+  - `logs/gradcam_visualizations.png`
+  - `logs/sample_images.png`
+  - `logs/predictions_sample.png`
+
+Locust outputs:
+- `logs/locust_results_stats.csv`, `logs/locust_results_stats_history.csv`
+- `logs/locust_results_failures.csv`, `logs/locust_results_exceptions.csv`
+- `logs/locust_report.html`
+
+### Summary Metrics
+
+- Accuracy: 96.21%
+- Precision (weighted): 96.35%
+- Recall (weighted): 96.21%
+- F1-Score (weighted): 96.21%
+- ROC-AUC (weighted): 0.9984
+- Loss: 1.636
+
+### Visual Previews
+
+![Confusion Matrix](logs/confusion_matrix.png)
+
+![Per-Class Metrics](logs/per_class_metrics.png)
+
+![Training History](logs/training_history.png)
+
+![Grad-CAM](logs/gradcam_visualizations.png)
+
+![Sample Images](logs/sample_images.png)
+
+![Predictions Sample](logs/predictions_sample.png)
 
 ## 📊 Dataset
 
@@ -203,10 +245,11 @@ Results (CSV + HTML) are saved to `logs/locust_results/`.
 - **Format**: .jpg files organized by class directory
 - **License**: [Kaggle Dataset License](https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset)
 
-### Download via Kaggle API
+### Download via Kaggle API (optional)
 
 ```bash
-kaggle competitions download -c cassava-leaf-disease-classification
+kaggle datasets download -d masoudnickparvar/brain-tumor-mri-dataset -p data/
+unzip data/brain-tumor-mri-dataset.zip -d data/
 ```
 
 ---
@@ -253,13 +296,13 @@ curl -X POST "http://localhost:8000/predict" \
 **Response:**
 ```json
 {
-  "predicted_class": "Cassava Brown Streak Disease",
+  "predicted_class": "Glioma",
   "confidence": 0.987,
   "probabilities": {
-    "CBSD": 0.987,
-    "CGM": 0.008,
-    "CMD": 0.004,
-    "Healthy": 0.001
+    "Glioma": 0.987,
+    "Meningioma": 0.008,
+    "Pituitary": 0.004,
+    "No Tumor": 0.001
   },
   "inference_time_ms": 145.3
 }
@@ -385,7 +428,7 @@ Check API health and model status.
    - Loads uploaded images
    - Preprocesses & augments
    - Fine-tunes existing model
-   - Saves new checkpoint to `models/cassava_model_v{n}.h5`
+  - Saves new checkpoint to `models/brain_tumor_model_v{n}.h5`
    - Logs metrics
 4. **UI polls status** → shows progress
 5. **Model auto-reloaded** in API once training completes
@@ -394,10 +437,11 @@ Check API health and model status.
 
 ## ✅ Assignment Coverage Checklist
 
-- Model pipeline (data acquisition, preprocessing, training, testing) – in `notebook/brain_tumor_mri.ipynb` and `src/`
-- Offline evaluation with metrics and visualizations – in notebook (confusion matrix, per-class metrics)
-- API creation – FastAPI mock API in `src/api_mock.py` with `/predict`, `/retrain`, `/retrain_status`, `/retrain_jobs`, `/upload_training_data`, `/metrics`, `/dataset_stats`
-- UI – Streamlit in `deploy/ui.py`: Predict, Visualizations, Upload & Retrain, Model Info, Admin (uptime)
+-- Model pipeline (data acquisition, preprocessing, training, testing) – in `notebook/brain_tumor_mri.ipynb` and `src/`
+-- Offline evaluation with metrics and visualizations – notebook includes confusion matrix, per-class metrics, Grad-CAM
+-- API – FastAPI mock API in `src/api_mock.py` with `/predict`, `/retrain`, `/retrain_status`, `/retrain_jobs`, `/upload_training_data`, `/metrics`, `/dataset_stats`
+-- UI – Streamlit in `deploy/ui.py`: Predict, Visualizations, Upload & Retrain, Model Info, Admin
+-- Results – Executed notebook artifacts available under `logs/` and metrics in `models/model_metadata.json`
 - Deployment – Docker (root `Dockerfile`, `deploy/Dockerfile.api`, `deploy/Dockerfile.ui`), Render setup
 - Load testing – `locustfile.py` + instructions; supports scaling via `docker-compose.yml` and Nginx
 - Smoke tests – `scripts/smoke_test.py`
@@ -619,7 +663,7 @@ This project is licensed under the MIT License. See `LICENSE` for details.
 
 ## 👨‍💻 Author
 
-James Jok – African Leadership University (ALU)
+James Jok Dut Akuei– African Leadership University (ALU)
 
 ---
 
