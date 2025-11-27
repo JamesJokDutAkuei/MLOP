@@ -227,7 +227,7 @@ Locust outputs:
 
 ![Sample Images](logs/sample_images.png)
 
-![Predictions Sample](logs/predictions_sample.png)
+<!-- Removed Predictions Sample image as requested -->
 
 ## 📊 Dataset
 
@@ -456,11 +456,11 @@ Check API health and model status.
 
 ```bash
 # Build & push image to Google Container Registry
-gcloud builds submit --tag gcr.io/YOUR-PROJECT/cassava-api
+gcloud builds submit --tag gcr.io/YOUR-PROJECT/brain-tumor-api
 
 # Deploy to Cloud Run
-gcloud run deploy cassava-api \
-  --image gcr.io/YOUR-PROJECT/cassava-api \
+gcloud run deploy brain-tumor-api \
+  --image gcr.io/YOUR-PROJECT/brain-tumor-api \
   --platform managed \
   --region us-central1 \
   --memory 4Gi \
@@ -555,11 +555,11 @@ Tell me which of the above you'd like me to do next (execute notebook, run more 
 
 ```bash
 # Create GKE cluster
-gcloud container clusters create cassava-cluster --zone us-central1-a
+gcloud container clusters create brain-tumor-cluster --zone us-central1-a
 
 # Push images
-docker tag mlop-api:latest gcr.io/YOUR-PROJECT/cassava-api:latest
-docker push gcr.io/YOUR-PROJECT/cassava-api:latest
+docker tag mlop-api:latest gcr.io/YOUR-PROJECT/brain-tumor-api:latest
+docker push gcr.io/YOUR-PROJECT/brain-tumor-api:latest
 
 # Apply Kubernetes manifests
 kubectl apply -f k8s/deployment.yaml
@@ -591,7 +591,7 @@ kubectl apply -f k8s/service.yaml
 
 ## 🎥 Video Demo
 
-**YouTube Link**: [Cassava Leaf Disease MLOps Pipeline Demo](https://www.youtube.com/watch?v=YOUR-VIDEO-ID)
+**YouTube Link**: [Brain Tumor MRI Classifier MLOps Demo](https://www.youtube.com/watch?v=YOUR-VIDEO-ID)
 
 **Demo Covers:**
 - Single image prediction

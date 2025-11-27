@@ -3,7 +3,7 @@
 
 set -e
 
-echo "🚀 Starting Cassava Leaf Disease MLOps Pipeline..."
+echo "🚀 Starting Brain Tumor MRI MLOps Pipeline..."
 echo ""
 
 # Check if Docker is available

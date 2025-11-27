@@ -42,7 +42,7 @@ data/uploads/
 data/uploads_archive/
 
 # Models
-models/cassava_model_*.h5
+models/brain_tumor_model_*.h5
 models/model_checkpoints/
 
 # Logs

@@ -2,7 +2,7 @@
 # Installation and Setup Guide
 
 echo "=========================================="
-echo "Cassava Leaf Disease MLOps Pipeline Setup"
+echo "Brain Tumor MRI MLOps Pipeline Setup"
 echo "=========================================="
 echo ""
 
@@ -36,7 +36,7 @@ echo ""
 echo "Next steps:"
 echo ""
 echo "1️⃣  Train model (Jupyter Notebook):"
-echo "   jupyter notebook notebook/cassava_leaf_disease.ipynb"
+echo "   jupyter notebook notebook/brain_tumor_mri.ipynb"
 echo ""
 echo "2️⃣  Run API server:"
 echo "   python src/api.py"

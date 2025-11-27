@@ -211,7 +211,7 @@ def train_model(
     epochs: int = EPOCHS,
     batch_size: int = BATCH_SIZE,
     class_weights: dict = None,
-    model_name: str = 'cassava_model'
+    model_name: str = 'brain_tumor_model'
 ) -> Tuple[models.Model, dict]:
     """
     Train the model on training data with validation.

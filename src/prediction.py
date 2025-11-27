@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 
 # Class labels
 CLASS_LABELS = {
-    0: 'Cassava Brown Streak Disease (CBSD)',
-    1: 'Cassava Green Mottle (CGM)',
-    2: 'Cassava Mosaic Disease (CMD)',
+    0: 'Glioma',
+    1: 'Meningioma',
+    2: 'Pituitary',
     3: 'Healthy',
     4: 'Unknown'
 }
@@ -41,8 +41,8 @@ IMAGE_SIZE = (224, 224)
 CONFIDENCE_THRESHOLD = 0.5
 
 
-class CassavaPredictor:
-    """Predictor class for Cassava Leaf Disease classification."""
+class BrainTumorPredictor:
+    """Predictor class for Brain Tumor MRI classification."""
     
     def __init__(self, model_path: str):
         """
@@ -181,7 +181,7 @@ class CassavaPredictor:
         return results
 
 
-def get_predictor(model_path: str) -> CassavaPredictor:
+def get_predictor(model_path: str) -> BrainTumorPredictor:
     """
     Get or create predictor instance.
     
@@ -189,6 +189,6 @@ def get_predictor(model_path: str) -> CassavaPredictor:
         model_path: Path to model file
         
     Returns:
-        CassavaPredictor instance
+        BrainTumorPredictor instance
     """
-    return CassavaPredictor(model_path)
+    return BrainTumorPredictor(model_path)

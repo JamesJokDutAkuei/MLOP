@@ -1,7 +1,7 @@
 #!/bin/bash
-# Download Cassava dataset from Kaggle
+ # Download Brain Tumor MRI dataset from Kaggle
 
-echo "📥 Downloading Cassava Leaf Disease dataset..."
+echo "📥 Downloading Brain Tumor MRI dataset..."
 echo ""
 echo "This script requires Kaggle API credentials."
 echo "Setup: https://github.com/Kaggle/kaggle-api#api-credentials"

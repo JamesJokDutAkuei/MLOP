@@ -1,5 +1,5 @@
 """
-Retraining Module for Cassava Leaf Disease Classifier
+Retraining Module for Brain Tumor MRI Classifier
 
 Handles model retraining on newly uploaded data with:
 - Data loading and preprocessing
@@ -47,7 +47,7 @@ IMAGENET_MEAN = np.array([0.485, 0.456, 0.406])
 IMAGENET_STD = np.array([0.229, 0.224, 0.225])
 
 
-class CassavaRetrainer:
+class BrainTumorRetrainer:
     """Handles model retraining on new data."""
     
     def __init__(self, model_path: str, version: int = 1):
@@ -153,7 +153,7 @@ class CassavaRetrainer:
                 verbose=1
             ),
             ModelCheckpoint(
-                filepath=str(MODELS_DIR / f'cassava_model_checkpoint_v{self.version}.h5'),
+                filepath=str(MODELS_DIR / f'brain_tumor_model_checkpoint_v{self.version}.h5'),
                 monitor='val_accuracy',
                 save_best_only=True,
                 verbose=1
@@ -199,7 +199,7 @@ class CassavaRetrainer:
         if version is None:
             version = self.version
         
-        model_path = MODELS_DIR / f'cassava_model_v{version}.h5'
+        model_path = MODELS_DIR / f'brain_tumor_model_v{version}.h5'
         
         try:
             self.model.save(str(model_path))
@@ -282,8 +282,8 @@ def main():
     """Main retraining workflow."""
     try:
         # Initialize retrainer
-        base_model_path = MODELS_DIR / 'cassava_model_v1.h5'
-        retrainer = CassavaRetrainer(str(base_model_path), version=2)
+        base_model_path = MODELS_DIR / 'brain_tumor_model_v1.h5'
+        retrainer = BrainTumorRetrainer(str(base_model_path), version=2)
         
         # Retrain model
         retrain_results = retrainer.retrain(
